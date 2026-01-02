@@ -1,14 +1,5 @@
 const mongoose = require("mongoose");
 
-/**
- * @typedef {Object} Catway
- * @property {number} catwayNumber - Numéro unique du catway
- * @property {string} type - "long" | "short"
- * @property {string} state - État / commentaire
- * @property {Date} createdAt
- * @property {Date} updatedAt
- */
-
 const catwaySchema = new mongoose.Schema(
   {
     catwayNumber: {
@@ -17,16 +8,18 @@ const catwaySchema = new mongoose.Schema(
       unique: true,
       min: 1,
     },
-    type: {
+    catwayType: {
       type: String,
       required: true,
       enum: ["long", "short"],
-    },
-    state: {
-      type: String,
-      default: "",
       trim: true,
-      maxlength: 500,
+      lowercase: true,
+    },
+    catwayState: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
     },
   },
   { timestamps: true }
