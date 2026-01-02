@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "nodemon src/server.js",
-  "start": "node src/server.js"
-},
-
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/obistafff/devoir-api-port-russel.git"
@@ -23,7 +22,8 @@
   "dependencies": {
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
