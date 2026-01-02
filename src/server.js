@@ -1,17 +1,17 @@
 require("dotenv").config();
-const app = require("./app");
-const { connectDB } = require("./config/db");
+const express = require("express");
+const connectDB = require("./config/db");
+
+const app = express();
+app.use(express.json());
+
+connectDB();
+
+app.get("/", (req, res) => {
+  res.send("API OK");
+});
 
 const PORT = process.env.PORT || 3000;
-
-(async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  } catch (err) {
-    console.error("❌ Erreur MongoDB :", err.message);
-    process.exit(1);
-  }
-})();
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);
