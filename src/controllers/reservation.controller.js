@@ -1,7 +1,7 @@
 const Reservation = require("../models/Reservation");
 
 exports.getAll = async (req, res) => {
-  const items = await Reservation.find().sort({ checkIn: -1 });
+  const items = await Reservation.find().sort({ startDate: -1 });
   res.json(items);
 };
 
