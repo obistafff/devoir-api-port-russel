@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title><%= title %></title></head>
+<body>
+  <h1>Réservations</h1>
+
+  <nav>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/catways">Catways</a> |
+    <a href="/reservations">Réservations</a> |
+    <a href="/users">Users</a> |
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <p><a href="/reservations/new">+ Nouvelle réservation</a></p>
+
+  <% if (!reservations || reservations.length === 0) { %>
+    <p>Aucune réservation.</p>
+  <% } else { %>
+    <table border="1" cellpadding="6">
+      <tr>
+        <th>Catway #</th>
+        <th>Client</th>
+        <th>Bateau</th>
+        <th>Début</th>
+        <th>Fin</th>
+        <th>Actions</th>
+      </tr>
+      <% reservations.forEach(r => { %>
+        <tr>
+          <td><%= r.catwayNumber %></td>
+          <td><%= r.clientName %></td>
+          <td><%= r.boatName %></td>
+          <td><%= new Date(r.startDate).toLocaleDateString("fr-FR") %></td>
+          <td><%= new Date(r.endDate).toLocaleDateString("fr-FR") %></td>
+          <td>
+            <a href="/reservations/<%= r._id %>/edit">Modifier</a>
+            <form method="POST" action="/reservations/<%= r._id %>/delete" style="display:inline;">
+              <button type="submit" onclick="return confirm('Supprimer cette réservation ?')">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  <% } %>
+</body>
+</html>
