@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title><%= title %></title></head>
+<body>
+  <h1>Users</h1>
+
+  <nav>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/catways">Catways</a> |
+    <a href="/reservations">Réservations</a> |
+    <a href="/users">Users</a> |
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <p><a href="/users/new">+ Nouvel utilisateur</a></p>
+
+  <% if (!users || users.length === 0) { %>
+    <p>Aucun utilisateur.</p>
+  <% } else { %>
+    <table border="1" cellpadding="6">
+      <tr>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Créé</th>
+        <th>Actions</th>
+      </tr>
+      <% users.forEach(u => { %>
+        <tr>
+          <td><%= u.name %></td>
+          <td><%= u.email %></td>
+          <td><%= u.createdAt ? new Date(u.createdAt).toLocaleDateString("fr-FR") : "" %></td>
+          <td>
+            <a href="/users/<%= u._id %>/edit">Modifier</a>
+            <form method="POST" action="/users/<%= u._id %>/delete" style="display:inline;">
+              <button type="submit" onclick="return confirm('Supprimer cet utilisateur ?')">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  <% } %>
+</body>
+</html>
