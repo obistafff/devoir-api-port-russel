@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title><%= title %></title>
+</head>
+<body>
+  <h1>Dashboard</h1>
+
+  <p>Connecté : <%= user.name %> (<%= user.email %>)</p>
+  <p>Date : <%= today %></p>
+
+  <nav>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/catways">Catways</a> |
+    <a href="/reservations">Réservations</a> |
+    <a href="/users">Users</a> |
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <hr />
+
+  <h2>Statistiques</h2>
+  <ul>
+    <li>Catways : <strong><%= stats?.catways ?? 0 %></strong></li>
+    <li>Réservations : <strong><%= stats?.reservations ?? 0 %></strong></li>
+    <li>Utilisateurs : <strong><%= stats?.users ?? 0 %></strong></li>
+  </ul>
+
+  <h2>Dernières réservations</h2>
+
+  <% if (!lastReservations || lastReservations.length === 0) { %>
+    <p>Aucune réservation pour le moment.</p>
+  <% } else { %>
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Catway #</th>
+          <th>Client</th>
+          <th>Bateau</th>
+          <th>Début</th>
+          <th>Fin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% lastReservations.forEach(r => { %>
+          <tr>
+            <td><%= r.catwayNumber %></td>
+            <td><%= r.clientName %></td>
+            <td><%= r.boatName %></td>
+            <td><%= new Date(r.startDate).toLocaleDateString("fr-FR") %></td>
+            <td><%= new Date(r.endDate).toLocaleDateString("fr-FR") %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+</body>
+</html>

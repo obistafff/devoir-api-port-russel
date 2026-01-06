@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title><%= title %></title></head>
+<body>
+  <h1>Port Russell</h1>
+
+  <p><a href="/api-docs">Documentation API</a></p>
+
+  <% if (error) { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/login">
+    <div>
+      <label>Email</label>
+      <input name="email" type="email" required />
+    </div>
+    <div>
+      <label>Mot de passe</label>
+      <input name="password" type="password" required />
+    </div>
+    <button type="submit">Se connecter</button>
+  </form>
+</body>
+</html>
