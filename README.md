@@ -23,7 +23,7 @@ Le projet comprend :
 
  Compte de démonstration
 - Email : admin@port-russell.test
-- Mot de passe : admin123
+- Mot de passe : Admin123!
 
  Installation en local
 
