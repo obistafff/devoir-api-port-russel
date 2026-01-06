@@ -18,8 +18,8 @@ Le projet comprend :
 - Swagger (swagger-ui-express, swagger-jsdoc)
 
  Déploiement
-- Application : https://TON-URL-RENDER.onrender.com
-- Documentation Swagger : https://TON-URL-RENDER.onrender.com/api-docs
+- Application : https://devoir-api-port-russel.onrender.com
+- Documentation Swagger : https://devoir-api-port-russel.onrender.com/api-docs
 
  Compte de démonstration
 - Email : admin@port-russell.test
