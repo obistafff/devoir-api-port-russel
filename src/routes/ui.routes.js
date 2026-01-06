@@ -159,6 +159,104 @@ router.post("/catways/:id/delete", requireAuth, async (req, res) => {
   res.redirect("/catways");
 });
 
+// ===== RESERVATIONS UI =====
+
+// Liste
+router.get("/reservations", requireAuth, async (req, res) => {
+  const reservations = await Reservation.find().sort({ startDate: -1 });
+  res.render("reservations/index", {
+    title: "Réservations",
+    user: req.session.user,
+    reservations,
+  });
+});
+
+// Form création (avec dropdown catways)
+router.get("/reservations/new", requireAuth, async (req, res) => {
+  const catways = await Catway.find().sort({ catwayNumber: 1 });
+  res.render("reservations/new", {
+    title: "Nouvelle réservation",
+    user: req.session.user,
+    catways,
+    error: null,
+  });
+});
+
+// Create
+router.post("/reservations", requireAuth, async (req, res) => {
+  try {
+    await Reservation.create({
+      catwayNumber: Number(req.body.catwayNumber),
+      clientName: req.body.clientName,
+      boatName: req.body.boatName,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+    });
+    res.redirect("/reservations");
+  } catch (err) {
+    const catways = await Catway.find().sort({ catwayNumber: 1 });
+    res.status(400).render("reservations/new", {
+      title: "Nouvelle réservation",
+      user: req.session.user,
+      catways,
+      error: "Erreur : vérifie les champs et les dates.",
+    });
+  }
+});
+
+// Form edit
+router.get("/reservations/:id/edit", requireAuth, async (req, res) => {
+  const reservation = await Reservation.findById(req.params.id);
+  if (!reservation) return res.status(404).send("Réservation introuvable");
+
+  const catways = await Catway.find().sort({ catwayNumber: 1 });
+
+  res.render("reservations/edit", {
+    title: "Modifier réservation",
+    user: req.session.user,
+    reservation,
+    catways,
+    error: null,
+  });
+});
+
+// Update
+router.post("/reservations/:id", requireAuth, async (req, res) => {
+  try {
+    const updated = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      {
+        catwayNumber: Number(req.body.catwayNumber),
+        clientName: req.body.clientName,
+        boatName: req.body.boatName,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) return res.status(404).send("Réservation introuvable");
+    res.redirect("/reservations");
+  } catch (err) {
+    const reservation = await Reservation.findById(req.params.id);
+    const catways = await Catway.find().sort({ catwayNumber: 1 });
+
+    res.status(400).render("reservations/edit", {
+      title: "Modifier réservation",
+      user: req.session.user,
+      reservation,
+      catways,
+      error: "Erreur : vérifie les champs et les dates.",
+    });
+  }
+});
+
+// Delete
+router.post("/reservations/:id/delete", requireAuth, async (req, res) => {
+  await Reservation.findByIdAndDelete(req.params.id);
+  res.redirect("/reservations");
+});
+
 
 // Logout
 router.get("/logout", (req, res) => {

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title><%= title %></title></head>
+<body>
+  <h1>Nouvelle réservation</h1>
+
+  <nav>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/reservations">Réservations</a> |
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <% if (error) { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/reservations">
+    <div>
+      <label>Catway</label>
+      <select name="catwayNumber" required>
+        <% catways.forEach(c => { %>
+          <option value="<%= c.catwayNumber %>"><%= c.catwayNumber %> - <%= c.catwayType %> - <%= c.catwayState %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div>
+      <label>Client</label>
+      <input name="clientName" type="text" required />
+    </div>
+
+    <div>
+      <label>Bateau</label>
+      <input name="boatName" type="text" required />
+    </div>
+
+    <div>
+      <label>Début</label>
+      <input name="startDate" type="date" required />
+    </div>
+
+    <div>
+      <label>Fin</label>
+      <input name="endDate" type="date" required />
+    </div>
+
+    <button type="submit">Créer</button>
+  </form>
+
+  <p><a href="/reservations">← Retour</a></p>
+</body>
+</html>
