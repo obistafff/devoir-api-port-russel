@@ -1,9 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const requireAuth = require("../middlewares/requireAuth");
-const User = require("../models/User");
 
-// ✅ Ajouts pour dashboard enrichi
+const User = require("../models/User");
 const Catway = require("../models/Catway");
 const Reservation = require("../models/Reservation");
 
@@ -43,11 +42,12 @@ router.post("/login", async (req, res) => {
     req.session.user = { id: user._id, email: user.email, name: user.name };
     return res.redirect("/dashboard");
   } catch (err) {
+    console.error("login error:", err);
     return res.status(500).render("index", { title: "Port Russell", error: "Erreur serveur." });
   }
 });
 
-// ✅ Dashboard enrichi
+// Dashboard enrichi
 router.get("/dashboard", requireAuth, async (req, res) => {
   try {
     const today = new Date().toLocaleDateString("fr-FR");
@@ -62,7 +62,7 @@ router.get("/dashboard", requireAuth, async (req, res) => {
     res.render("dashboard", {
       title: "Dashboard",
       today,
-      user: req.session.user, // ✅ IMPORTANT
+      user: req.session.user,
       stats: {
         catways: catwaysCount,
         reservations: reservationsCount,
@@ -71,6 +71,7 @@ router.get("/dashboard", requireAuth, async (req, res) => {
       lastReservations,
     });
   } catch (err) {
+    console.error("dashboard error:", err);
     return res.status(500).send("Erreur dashboard");
   }
 });
@@ -79,12 +80,17 @@ router.get("/dashboard", requireAuth, async (req, res) => {
 
 // Liste des catways
 router.get("/catways", requireAuth, async (req, res) => {
-  const catways = await Catway.find().sort({ catwayNumber: 1 });
-  res.render("catways/index", {
-    title: "Catways",
-    user: req.session.user,
-    catways,
-  });
+  try {
+    const catways = await Catway.find().sort({ catwayNumber: 1 });
+    res.render("catways/index", {
+      title: "Catways",
+      user: req.session.user,
+      catways,
+    });
+  } catch (err) {
+    console.error("catways list error:", err);
+    res.status(500).send("Erreur catways");
+  }
 });
 
 // Form création
@@ -106,6 +112,7 @@ router.post("/catways", requireAuth, async (req, res) => {
     });
     res.redirect("/catways");
   } catch (err) {
+    console.error("catway create error:", err);
     res.status(400).render("catways/new", {
       title: "Nouveau catway",
       user: req.session.user,
@@ -116,15 +123,20 @@ router.post("/catways", requireAuth, async (req, res) => {
 
 // Form édition
 router.get("/catways/:id/edit", requireAuth, async (req, res) => {
-  const catway = await Catway.findById(req.params.id);
-  if (!catway) return res.status(404).send("Catway introuvable");
+  try {
+    const catway = await Catway.findById(req.params.id);
+    if (!catway) return res.status(404).send("Catway introuvable");
 
-  res.render("catways/edit", {
-    title: "Modifier catway",
-    user: req.session.user,
-    catway,
-    error: null,
-  });
+    res.render("catways/edit", {
+      title: "Modifier catway",
+      user: req.session.user,
+      catway,
+      error: null,
+    });
+  } catch (err) {
+    console.error("catway edit form error:", err);
+    res.status(500).send("Erreur catway");
+  }
 });
 
 // Update (POST pour HTML)
@@ -143,6 +155,7 @@ router.post("/catways/:id", requireAuth, async (req, res) => {
     if (!updated) return res.status(404).send("Catway introuvable");
     res.redirect("/catways");
   } catch (err) {
+    console.error("catway update error:", err);
     const catway = await Catway.findById(req.params.id);
     res.status(400).render("catways/edit", {
       title: "Modifier catway",
@@ -155,31 +168,47 @@ router.post("/catways/:id", requireAuth, async (req, res) => {
 
 // Delete
 router.post("/catways/:id/delete", requireAuth, async (req, res) => {
-  await Catway.findByIdAndDelete(req.params.id);
-  res.redirect("/catways");
+  try {
+    await Catway.findByIdAndDelete(req.params.id);
+    res.redirect("/catways");
+  } catch (err) {
+    console.error("catway delete error:", err);
+    res.status(500).send("Erreur suppression catway");
+  }
 });
 
 // ===== RESERVATIONS UI =====
 
 // Liste
 router.get("/reservations", requireAuth, async (req, res) => {
-  const reservations = await Reservation.find().sort({ startDate: -1 });
-  res.render("reservations/index", {
-    title: "Réservations",
-    user: req.session.user,
-    reservations,
-  });
+  try {
+    const reservations = await Reservation.find().sort({ startDate: -1 });
+    res.render("reservations/index", {
+      title: "Réservations",
+      user: req.session.user,
+      reservations,
+    });
+  } catch (err) {
+    console.error("reservations list error:", err);
+    res.status(500).send("Erreur réservations");
+  }
 });
 
-// Form création (avec dropdown catways)
+// Form création (dropdown catways)
 router.get("/reservations/new", requireAuth, async (req, res) => {
-  const catways = await Catway.find().sort({ catwayNumber: 1 });
-  res.render("reservations/new", {
-    title: "Nouvelle réservation",
-    user: req.session.user,
-    catways,
-    error: null,
-  });
+  try {
+    // BONUS: proposer en priorité les catways en bon état
+    const catways = await Catway.find().sort({ catwayState: 1, catwayNumber: 1 });
+    res.render("reservations/new", {
+      title: "Nouvelle réservation",
+      user: req.session.user,
+      catways,
+      error: null,
+    });
+  } catch (err) {
+    console.error("reservation new form error:", err);
+    res.status(500).send("Erreur form réservation");
+  }
 });
 
 // Create
@@ -194,7 +223,8 @@ router.post("/reservations", requireAuth, async (req, res) => {
     });
     res.redirect("/reservations");
   } catch (err) {
-    const catways = await Catway.find().sort({ catwayNumber: 1 });
+    console.error("reservation create error:", err);
+    const catways = await Catway.find().sort({ catwayState: 1, catwayNumber: 1 });
     res.status(400).render("reservations/new", {
       title: "Nouvelle réservation",
       user: req.session.user,
@@ -206,18 +236,23 @@ router.post("/reservations", requireAuth, async (req, res) => {
 
 // Form edit
 router.get("/reservations/:id/edit", requireAuth, async (req, res) => {
-  const reservation = await Reservation.findById(req.params.id);
-  if (!reservation) return res.status(404).send("Réservation introuvable");
+  try {
+    const reservation = await Reservation.findById(req.params.id);
+    if (!reservation) return res.status(404).send("Réservation introuvable");
 
-  const catways = await Catway.find().sort({ catwayNumber: 1 });
+    const catways = await Catway.find().sort({ catwayState: 1, catwayNumber: 1 });
 
-  res.render("reservations/edit", {
-    title: "Modifier réservation",
-    user: req.session.user,
-    reservation,
-    catways,
-    error: null,
-  });
+    res.render("reservations/edit", {
+      title: "Modifier réservation",
+      user: req.session.user,
+      reservation,
+      catways,
+      error: null,
+    });
+  } catch (err) {
+    console.error("reservation edit form error:", err);
+    res.status(500).send("Erreur réservation");
+  }
 });
 
 // Update
@@ -238,8 +273,10 @@ router.post("/reservations/:id", requireAuth, async (req, res) => {
     if (!updated) return res.status(404).send("Réservation introuvable");
     res.redirect("/reservations");
   } catch (err) {
+    console.error("reservation update error:", err);
+
     const reservation = await Reservation.findById(req.params.id);
-    const catways = await Catway.find().sort({ catwayNumber: 1 });
+    const catways = await Catway.find().sort({ catwayState: 1, catwayNumber: 1 });
 
     res.status(400).render("reservations/edit", {
       title: "Modifier réservation",
@@ -253,15 +290,25 @@ router.post("/reservations/:id", requireAuth, async (req, res) => {
 
 // Delete
 router.post("/reservations/:id/delete", requireAuth, async (req, res) => {
-  await Reservation.findByIdAndDelete(req.params.id);
-  res.redirect("/reservations");
+  try {
+    await Reservation.findByIdAndDelete(req.params.id);
+    res.redirect("/reservations");
+  } catch (err) {
+    console.error("reservation delete error:", err);
+    res.status(500).send("Erreur suppression réservation");
+  }
 });
 
-
-// Logout
+// Logout (propre)
 router.get("/logout", (req, res) => {
-  req.session.destroy(() => res.redirect("/"));
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("logout error:", err);
+      return res.status(500).send("Erreur logout");
+    }
+    res.clearCookie("connect.sid");
+    return res.redirect("/");
+  });
 });
 
 module.exports = router;
-
