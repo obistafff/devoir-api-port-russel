@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title><%= title %></title></head>
+<body>
+  <h1>Catways</h1>
+
+  <nav>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/catways">Catways</a> |
+    <a href="/reservations">Réservations</a> |
+    <a href="/users">Users</a> |
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <p><a href="/catways/new">+ Nouveau catway</a></p>
+
+  <% if (!catways || catways.length === 0) { %>
+    <p>Aucun catway.</p>
+  <% } else { %>
+    <table border="1" cellpadding="6">
+      <tr>
+        <th>Numéro</th>
+        <th>Type</th>
+        <th>État</th>
+        <th>Actions</th>
+      </tr>
+      <% catways.forEach(c => { %>
+        <tr>
+          <td><%= c.catwayNumber %></td>
+          <td><%= c.catwayType %></td>
+          <td><%= c.catwayState %></td>
+          <td>
+            <a href="/catways/<%= c._id %>/edit">Modifier</a>
+            <form method="POST" action="/catways/<%= c._id %>/delete" style="display:inline;">
+              <button type="submit" onclick="return confirm('Supprimer ce catway ?')">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  <% } %>
+</body>
+</html>

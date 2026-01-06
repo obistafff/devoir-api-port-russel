@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title><%= title %></title></head>
+<body>
+  <h1>Nouveau catway</h1>
+
+  <nav>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/catways">Catways</a> |
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <% if (error) { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/catways">
+    <div>
+      <label>Numéro</label>
+      <input name="catwayNumber" type="number" required />
+    </div>
+
+    <div>
+      <label>Type</label>
+      <select name="catwayType" required>
+        <option value="short">short</option>
+        <option value="long">long</option>
+      </select>
+    </div>
+
+    <div>
+      <label>État</label>
+      <input name="catwayState" type="text" required />
+    </div>
+
+    <button type="submit">Créer</button>
+  </form>
+
+  <p><a href="/catways">← Retour</a></p>
+</body>
+</html>
