@@ -75,6 +75,91 @@ router.get("/dashboard", requireAuth, async (req, res) => {
   }
 });
 
+// ===== CATWAYS UI =====
+
+// Liste des catways
+router.get("/catways", requireAuth, async (req, res) => {
+  const catways = await Catway.find().sort({ catwayNumber: 1 });
+  res.render("catways/index", {
+    title: "Catways",
+    user: req.session.user,
+    catways,
+  });
+});
+
+// Form création
+router.get("/catways/new", requireAuth, (req, res) => {
+  res.render("catways/new", {
+    title: "Nouveau catway",
+    user: req.session.user,
+    error: null,
+  });
+});
+
+// Create
+router.post("/catways", requireAuth, async (req, res) => {
+  try {
+    await Catway.create({
+      catwayNumber: Number(req.body.catwayNumber),
+      catwayType: req.body.catwayType,
+      catwayState: req.body.catwayState,
+    });
+    res.redirect("/catways");
+  } catch (err) {
+    res.status(400).render("catways/new", {
+      title: "Nouveau catway",
+      user: req.session.user,
+      error: "Erreur : vérifie les champs (numéro unique, type short/long, état).",
+    });
+  }
+});
+
+// Form édition
+router.get("/catways/:id/edit", requireAuth, async (req, res) => {
+  const catway = await Catway.findById(req.params.id);
+  if (!catway) return res.status(404).send("Catway introuvable");
+
+  res.render("catways/edit", {
+    title: "Modifier catway",
+    user: req.session.user,
+    catway,
+    error: null,
+  });
+});
+
+// Update (POST pour HTML)
+router.post("/catways/:id", requireAuth, async (req, res) => {
+  try {
+    const updated = await Catway.findByIdAndUpdate(
+      req.params.id,
+      {
+        catwayNumber: Number(req.body.catwayNumber),
+        catwayType: req.body.catwayType,
+        catwayState: req.body.catwayState,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) return res.status(404).send("Catway introuvable");
+    res.redirect("/catways");
+  } catch (err) {
+    const catway = await Catway.findById(req.params.id);
+    res.status(400).render("catways/edit", {
+      title: "Modifier catway",
+      user: req.session.user,
+      catway,
+      error: "Erreur : vérifie les champs (numéro unique, type short/long, état).",
+    });
+  }
+});
+
+// Delete
+router.post("/catways/:id/delete", requireAuth, async (req, res) => {
+  await Catway.findByIdAndDelete(req.params.id);
+  res.redirect("/catways");
+});
+
+
 // Logout
 router.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/"));
