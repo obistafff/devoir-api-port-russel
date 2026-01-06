@@ -1,6 +1,18 @@
 const router = require("express").Router();
 const ctrl = require("../controllers/user.controller");
 
+/**
+ * @openapi
+ * /api/users:
+ *   get:
+ *     summary: Liste tous les utilisateurs
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Liste des utilisateurs
+ */
+
 router.get("/", ctrl.getAll);
 router.get("/:id", ctrl.getOne);
 router.post("/", ctrl.create);
