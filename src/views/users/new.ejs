@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title><%= title %></title></head>
+<body>
+  <h1>Nouvel utilisateur</h1>
+
+  <nav>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/users">Users</a> |
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <% if (error) { %>
+    <p style="color:red;"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/users">
+    <div>
+      <label>Nom</label>
+      <input name="name" type="text" required />
+    </div>
+
+    <div>
+      <label>Email</label>
+      <input name="email" type="email" required />
+    </div>
+
+    <div>
+      <label>Mot de passe</label>
+      <input name="password" type="password" required />
+    </div>
+
+    <button type="submit">Créer</button>
+  </form>
+
+  <p><a href="/users">← Retour</a></p>
+</body>
+</html>

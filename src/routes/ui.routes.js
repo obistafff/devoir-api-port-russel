@@ -299,7 +299,155 @@ router.post("/reservations/:id/delete", requireAuth, async (req, res) => {
   }
 });
 
-// Logout (propre)
+// ===== USERS UI =====
+
+// Liste
+router.get("/users", requireAuth, async (req, res) => {
+  try {
+    const users = await User.find().select("name email createdAt").sort({ createdAt: -1 });
+    res.render("users/index", {
+      title: "Users",
+      user: req.session.user,
+      users,
+    });
+  } catch (err) {
+    console.error("users list error:", err);
+    res.status(500).send("Erreur users");
+  }
+});
+
+// Form création
+router.get("/users/new", requireAuth, (req, res) => {
+  res.render("users/new", {
+    title: "Nouvel utilisateur",
+    user: req.session.user,
+    error: null,
+  });
+});
+
+// Create (hash password)
+router.post("/users", requireAuth, async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).render("users/new", {
+        title: "Nouvel utilisateur",
+        user: req.session.user,
+        error: "Tous les champs sont requis.",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const exists = await User.findOne({ email: normalizedEmail });
+    if (exists) {
+      return res.status(400).render("users/new", {
+        title: "Nouvel utilisateur",
+        user: req.session.user,
+        error: "Email déjà utilisé.",
+      });
+    }
+
+    const hash = bcrypt.hashSync(password, 10);
+    await User.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password: hash,
+    });
+
+    res.redirect("/users");
+  } catch (err) {
+    console.error("users create error:", err);
+    res.status(400).render("users/new", {
+      title: "Nouvel utilisateur",
+      user: req.session.user,
+      error: "Erreur : vérifie les champs.",
+    });
+  }
+});
+
+// Form édition
+router.get("/users/:id/edit", requireAuth, async (req, res) => {
+  try {
+    const editUser = await User.findById(req.params.id).select("name email");
+    if (!editUser) return res.status(404).send("User introuvable");
+
+    res.render("users/edit", {
+      title: "Modifier utilisateur",
+      user: req.session.user,
+      editUser,
+      error: null,
+    });
+  } catch (err) {
+    console.error("users edit form error:", err);
+    res.status(500).send("Erreur user");
+  }
+});
+
+// Update (password optionnel)
+router.post("/users/:id", requireAuth, async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const editUser = await User.findById(req.params.id);
+    if (!editUser) return res.status(404).send("User introuvable");
+
+    const normalizedEmail = (email || "").toLowerCase().trim();
+
+    // Si email change, vérifier unicité
+    if (normalizedEmail && normalizedEmail !== editUser.email) {
+      const exists = await User.findOne({ email: normalizedEmail });
+      if (exists) {
+        return res.status(400).render("users/edit", {
+          title: "Modifier utilisateur",
+          user: req.session.user,
+          editUser: { _id: editUser._id, name, email },
+          error: "Email déjà utilisé.",
+        });
+      }
+      editUser.email = normalizedEmail;
+    }
+
+    if (name) editUser.name = name.trim();
+
+    // Password facultatif
+    if (password && password.trim().length > 0) {
+      editUser.password = bcrypt.hashSync(password.trim(), 10);
+    }
+
+    await editUser.save();
+    res.redirect("/users");
+  } catch (err) {
+    console.error("users update error:", err);
+
+    const fallback = await User.findById(req.params.id).select("name email");
+    res.status(400).render("users/edit", {
+      title: "Modifier utilisateur",
+      user: req.session.user,
+      editUser: fallback,
+      error: "Erreur : vérifie les champs.",
+    });
+  }
+});
+
+// Delete
+router.post("/users/:id/delete", requireAuth, async (req, res) => {
+  try {
+    // évite de te supprimer toi-même (optionnel mais safe)
+    if (String(req.session.user.id) === String(req.params.id)) {
+      return res.status(400).send("Impossible de supprimer l’utilisateur connecté.");
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.redirect("/users");
+  } catch (err) {
+    console.error("users delete error:", err);
+    res.status(500).send("Erreur suppression user");
+  }
+});
+
+// Logout
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
